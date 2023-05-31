@@ -1,0 +1,33 @@
+version: '2'
+
+services:
+  db:
+    image: postgres
+    container_name: db
+    environment:
+      POSTGRES_USERNAME: postgres
+      POSTGRES_PASSWORD: denys
+      POSTGRES_DB: Docker
+    ports:
+      - 5432:5432
+    volumes:
+      - db-data:/var/lib/postgresql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    command: postgres -c max_connections=300
+
+  app:
+    image: app
+    build:
+      context: .
+    container_name: app
+    ports:
+      - 8080:8080
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/Docker
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: denys
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+volumes:
+  db-data:
